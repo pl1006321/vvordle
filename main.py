@@ -1,60 +1,62 @@
-from colorama import *
-import string 
+from colorama import Fore, Style
+import string
 import random
+import os
 
 def import_words():
     with open('words.txt', 'r') as file:
-        words = file.read()    
-    return words.split()
+        words = file.read().split()
+    return words
 
-def choose_word():
-    return random.choice(words)
+def choose_word(words):
+    return random.choice(words).upper()
 
-def check_input(input):
-    if not input.isalpha() or len(input) != 5: 
-        return False
-    return True
+def check_input(word):
+    return word.isalpha() and len(word) == 5
 
-def take_input():
+def take_input(words):
     while True:
-        guess = str(input('enter a five letter word for your guess: '))
-        if not check_input(guess) or guess not in words:
-            print('invalid input! please try again')
-            input('enter anything to continue')
+        guess = input('enter a five-letter word for your guess: ').strip().lower()
+        if not check_input(guess):
+            print('invalid input! please enter a five-letter word. ')
         else:
-            break
-    return guess.upper()
+            return guess.upper()
 
 def check_guess(guess, answer):
-    if guess == answer:
-        correct_flag = True
-    final = {}
+    result = {}
+    answer_freq = {letter: answer.count(letter) for letter in set(answer)}
+   
     for i in range(5):
         letter = guess[i]
-        if letter in answer:
-            if letter == answer[i]:
-                final[letter] = 'GREEN'
-            else:
-                final[letter] = 'YELLOW'
-        else:
-            final[letter] = 'BLACK'
-    return final
+        if letter == answer[i]:
+            result[i] = (letter, 'GREEN')
+            answer_freq[letter] -= 1  
 
-def print_guess(dict):
-    for letter in dict.keys():
-        color = Fore.BLACK
-        if dict[letter] == 'GREEN':
-            color = Fore.GREEN
-        elif dict[letter] == 'YELLOW':
-            color = Fore.YELLOW
+    for i in range(5):
+        letter = guess[i]
+        if i in result:  
+            continue
+        if letter in answer and answer_freq[letter] > 0:
+            result[i] = (letter, 'YELLOW')
+            answer_freq[letter] -= 1
         else:
-            color = Fore.BLACK
-        print(color + letter, end=' ')
-    print(Fore.RESET)
+            result[i] = (letter, 'BLACK')
 
+    return result
+
+def print_guess(result):
+    for i in range(5):
+        letter, color = result[i]
+        if color == 'GREEN':
+            print(Fore.GREEN + letter, end=' ')
+        elif color == 'YELLOW':
+            print(Fore.YELLOW + letter, end=' ')
+        else:
+            print(Fore.BLACK + letter, end=' ')
+    print(Style.RESET_ALL)
 
 def print_lets(used):
-    for x in list(string.ascii_uppercase):
+    for x in string.ascii_uppercase:
         if x in used:
             if used[x] == 'GREEN':
                 print(Fore.GREEN + x, end=' ')
@@ -64,20 +66,41 @@ def print_lets(used):
                 print(Fore.BLACK + x, end=' ')
         else:
             print(Fore.RESET + x, end=' ')
-    print('\n')
-                
+    print('\n' + Style.RESET_ALL)
 
-words = import_words() 
-unused_lets = list(string.ascii_uppercase)
-used_lets = {} 
+def reprint(past_guesses, used_lets):
+    os.system('cls' if os.name == 'nt' else 'clear')
+    print('=================== my wordle!! ===================\n')
+    for guess_result in past_guesses:
+        print('                    ', end='')
+        print_guess(guess_result)
+    print('\n')
+    print_lets(used_lets)
+
+words = import_words()
+answer = choose_word(words)
+unused_lets = set(string.ascii_uppercase)
+used_lets = {}
+past_guesses = []
+max_attempts = 6
 correct_flag = False
 
-answer = random.choice(words).upper()
-guess = take_input()
-guess_results = check_guess(guess, answer)
-print('your guess: ', end=''); print_guess(guess_results)
-for letter in guess_results:
-    used_lets[letter] = guess_results[letter]
-print_lets(used_lets)
+for attempt in range(max_attempts):
+    print(f"\nattempt {attempt + 1} of {max_attempts}")
+    guess = take_input(words)
+    guess_results = check_guess(guess, answer)
+    past_guesses.append(guess_results)
 
+    for i in range(5):
+        letter, color = guess_results[i]
+        used_lets[letter] = color
+   
+    reprint(past_guesses, used_lets)
 
+    if guess == answer:
+        correct_flag = True
+        print(Fore.GREEN + f"   congratulations! you guessed the word: {answer.upper()}\n" + Style.RESET_ALL)
+        break
+
+if not correct_flag:
+    print(Fore.RED + f"      game over! the correct word was: {answer}\n" + Style.RESET_ALL)
