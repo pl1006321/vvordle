@@ -11,4 +11,4 @@ to install colorama: type
 simple run the script by typing: `python3 main.py` within the folder the files are stored in 
 
 # sample gameplay: 
-![gameplay]([https://ibb.co/YBpDBvJ9](https://i.ibb.co/0yhByP1N/Screenshot-2025-02-15-at-6-59-38-PM.png))
+![gameplay](gameplay.jpg)
