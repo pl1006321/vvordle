@@ -82,7 +82,6 @@ answer = choose_word(words)
 unused_lets = set(string.ascii_uppercase)
 used_lets = {}
 past_guesses = []
-max_attempts = 6
 correct_flag = False
 
 for attempt in range(6):
