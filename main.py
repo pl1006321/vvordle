@@ -85,8 +85,8 @@ past_guesses = []
 max_attempts = 6
 correct_flag = False
 
-for attempt in range(max_attempts):
-    print(f"\nattempt {attempt + 1} of {max_attempts}")
+for attempt in range(6):
+    print(f"\nattempt {attempt + 1} of 6")
     guess = take_input(words)
     guess_results = check_guess(guess, answer)
     past_guesses.append(guess_results)
